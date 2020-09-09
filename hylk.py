@@ -54,6 +54,9 @@ if __name__ == "__main__":
                     if file.endswith(".txt"):
                         # print(f"\tCopying {file} to the temporary directory")
                         shutil.copy(file, temp_directory)
+                        #########################################################
+                        # ADD CONDITIONAL TO LOOK FOR MORE DIRECTORIES INSTEAD OF JUST FILES
+                        ############################################################
                 # print(f"Listing contents of temp")
             temp_directory_sorted = sorted(os.listdir(temp_directory))
             print(f"Preparing to hash the files in {temp_directory}")
