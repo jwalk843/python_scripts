@@ -5,28 +5,17 @@ import hashlib
 import shutil
 
 """
-Look through all of the directories and subdirectories and collect all t
-he files. Once they are all collected, sort by just the filename (0-9A-Za-z) 
-and not the entire path, iterate over each file in a sorted fashion (0-9A-Za-z), and 
-get the sha1 hash of each file. Combine all the hashes to create a mega hash and 
-hash that hash. The output is a single sha1 hash. If any of the content in 
-the directory changes, the final hash will also change. This gives you the 
-means to quickly check the overall forensic integrity 
-of a directory (or even an entire file system). 
-The input will be a path to a file system to hash.
+Runcode CTF program submission
 """
-def parseDirectories(dname):
-    print(f"Parsing {dname} directory now...")
-# look for the directories
-    # create a list to store the names
-    dirs_list = []
-    print(f"Directories found...")
-    for dname in os.listdir(dname):
-        print(dname)
 
-def hashFiles(dname):
-    # hash the files in the directory 
-    pass
+
+def hashFiles(fname):
+    # open the files and hash the contents
+    with open(fname, "rb") as f:
+        content = f.read()
+    checksum = hashlib.sha1(content).hexdigest()
+    return checksum
+
 
 if __name__ == "__main__":
 
@@ -34,16 +23,40 @@ if __name__ == "__main__":
     if len(sys.argv) != NUM_ARGS:
         print(f"USAGE: {sys.argv[0]} + Target_directory")
         sys.exit()
-    
+
     # create a directory to hold the files that will be hashed
-    try:
-        os.mkdir('temp')
-    except FileExistsError as e:
-        print(f"{e}: The directory already exists")
-    finally:
-        # get a list of the folders in the directory
-        files_list = []
-        parseDirectories(sys.argv[1])
+    if not os.path.realpath(os.curdir).endswith("heard_you_like_hashes"):
+        os.chdir(os.path.realpath("heard_you_like_hashes"))
+    else:
+        try:
+            os.mkdir("temp")
 
+        except FileExistsError as e:
+            print(f"{e}: The directory already exists")
+        finally:
+            my_input = sys.argv[1]
+            main_directory = os.path.abspath(my_input)
+            print(f"Target Directory: {main_directory}")
+            temp_directory = os.path.abspath("temp")
+            print(f"Temp Directory is: {temp_directory}")
 
-
+            # look for the directories
+            # create a list to store the names
+            dirs_list = []
+            # print(f"Directories found...")
+            # for each subdirectory in the current working directory
+            for subdir in os.listdir(sys.argv[1]):
+                rel_directory = os.path.join(main_directory, subdir)
+                # Change to the subdirectory
+                os.chdir(rel_directory)
+                # print(os.listdir('.'))
+                for file in os.listdir("."):
+                    if file.endswith(".txt"):
+                        # print(f"\tCopying {file} to the temporary directory")
+                        shutil.copy(file, temp_directory)
+                # print(f"Listing contents of temp")
+            temp_directory_sorted = sorted(os.listdir(temp_directory))
+            print(f"Preparing to hash the files in {temp_directory}")
+            os.chdir(temp_directory)
+            for file in temp_directory_sorted:
+                print(hashFiles(file))
