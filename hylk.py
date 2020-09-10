@@ -4,10 +4,6 @@ import os
 import hashlib
 import shutil
 
-"""
-Runcode CTF program submission
-"""
-
 
 def hashFiles(fname):
     # open the files and hash the contents
@@ -28,38 +24,39 @@ if __name__ == "__main__":
     if not os.path.realpath(os.curdir).endswith("heard_you_like_hashes"):
         os.chdir(os.path.realpath("heard_you_like_hashes"))
     else:
-        try:
-            os.mkdir("temp")
+        my_input = sys.argv[1]
+        main_directory = os.path.abspath(my_input)
+        # print(f"Target Directory: {main_directory}")
+        temp_directory = os.path.abspath("temp")
+        # print(f"Temp Directory is: {temp_directory}")
 
-        except FileExistsError as e:
-            print(f"{e}: The directory already exists")
-        finally:
-            my_input = sys.argv[1]
-            main_directory = os.path.abspath(my_input)
-            print(f"Target Directory: {main_directory}")
-            temp_directory = os.path.abspath("temp")
-            print(f"Temp Directory is: {temp_directory}")
-
-            # look for the directories
-            # create a list to store the names
-            dirs_list = []
-            # print(f"Directories found...")
-            # for each subdirectory in the current working directory
-            for subdir in os.listdir(sys.argv[1]):
-                rel_directory = os.path.join(main_directory, subdir)
-                # Change to the subdirectory
-                os.chdir(rel_directory)
-                # print(os.listdir('.'))
-                for file in os.listdir("."):
-                    if file.endswith(".txt"):
-                        # print(f"\tCopying {file} to the temporary directory")
-                        shutil.copy(file, temp_directory)
-                        #########################################################
-                        # ADD CONDITIONAL TO LOOK FOR MORE DIRECTORIES INSTEAD OF JUST FILES
-                        ############################################################
-                # print(f"Listing contents of temp")
-            temp_directory_sorted = sorted(os.listdir(temp_directory))
-            print(f"Preparing to hash the files in {temp_directory}")
-            os.chdir(temp_directory)
-            for file in temp_directory_sorted:
-                print(hashFiles(file))
+        # create a list for the text files
+        textfiles = []
+        # walk the directory to see what's all in it
+        for root, dirs, files in os.walk(main_directory):
+            textfiles.append(files)
+        
+        for each in textfiles:
+            if '.txt' in each:
+                try:
+                    shutil.copy(each, temp_directory)
+                except FileNotFoundError as e:
+                    print(e)
+          
+            # print(f"Listing contents of temp")
+        temp_directory_sorted = sorted(os.listdir(temp_directory))
+        # print(f"Preparing to hash the files in {temp_directory}")
+        # print(f"=========================================")
+        os.chdir(temp_directory)
+        for file in temp_directory_sorted:
+            # print(f"{file}--> {hashFiles(file)}")
+            hashcheck = hashFiles(file)
+            # add each hash to the other to create one bigass hash
+            hashcheck = hashcheck
+            hashcheck += hashcheck
+            # print(hashcheck)
+        # hash the bigass hash :)
+        hashcheck = hashcheck.encode()
+        h = hashlib.sha1(hashcheck).hexdigest()
+        # print(f"the hash of the bigass hash is.....")
+        print(h)
